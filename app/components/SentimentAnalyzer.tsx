@@ -30,7 +30,12 @@ export default function SentimentAnalyzer() {
         setError('');
 
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://marketmaker-api.herokuapp.com';
+            // For local testing
+            // const API_URL = 'http://localhost:5000';
+
+            // For production deployment (commented out for now)
+            const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
             const response = await axios.post(`${API_URL}/api/analyze`, {
                 text
             });
