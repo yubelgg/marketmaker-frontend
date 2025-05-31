@@ -1,4 +1,103 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MarketMaker Frontend
+
+A Next.js frontend for the WallStreetBets Sentiment Analyzer using FinBERT.
+
+## Features
+
+- 🎯 Real-time sentiment analysis of WSB posts
+- 📊 Visual probability breakdown
+- 🚀 Modern React/Next.js interface
+- 📱 Responsive design with Tailwind CSS
+
+## Tech Stack
+
+- **Framework**: Next.js 15.3.2
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **HTTP Client**: Axios
+- **Deployment**: Vercel
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory:
+
+```bash
+NEXT_PUBLIC_API_URL=https://yubelgg-marketmaker-api-c2355b206177.herokuapp.com
+```
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Set environment variables in Vercel dashboard:
+   - `NEXT_PUBLIC_API_URL`: Your Heroku backend URL
+4. Deploy automatically on push
+
+### Manual Deployment
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod
+```
+
+## API Integration
+
+The frontend connects to a Flask backend that provides sentiment analysis using a fine-tuned FinBERT model. The API expects:
+
+```typescript
+// Request
+{
+  "text": "TSLA to the moon! 🚀🚀🚀"
+}
+
+// Response
+{
+  "text": "TSLA to the moon! 🚀🚀🚀",
+  "predictions": [
+    {"label": "positive", "score": 0.85},
+    {"label": "neutral", "score": 0.10},
+    {"label": "negative", "score": 0.05}
+  ],
+  "model": "yubelgg/marketmaker"
+}
+```
+
+## Project Structure
+
+```
+marketmaker-frontend/
+├── app/
+│   ├── components/
+│   │   └── SentimentAnalyzer.tsx
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── public/
+├── .env.local
+├── package.json
+└── vercel.json
+```
 
 ## Getting Started
 
