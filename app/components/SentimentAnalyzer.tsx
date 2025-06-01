@@ -10,6 +10,8 @@ interface SentimentResult {
         score: number;
     }>;
     model: string;
+    source?: string;
+    note?: string;
 }
 
 interface DisplayResult {
@@ -21,6 +23,8 @@ interface DisplayResult {
         neutral: number;
         negative: number;
     };
+    source?: string;
+    note?: string;
 }
 
 export default function SentimentAnalyzer() {
@@ -63,7 +67,9 @@ export default function SentimentAnalyzer() {
             text: apiResult.text,
             sentiment,
             confidence: maxProb,
-            probabilities
+            probabilities,
+            source: apiResult.source,
+            note: apiResult.note
         };
     };
 
@@ -75,15 +81,17 @@ export default function SentimentAnalyzer() {
 
         setLoading(true);
         setError('');
+        setResult(null);
 
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            // const API_URL = 'http://localhost:5000';
+            const API_URL = process.env.NEXT_PUBLIC_API_URL;
             console.log('Using API URL:', API_URL);
 
             const response = await axios.post(`${API_URL}/api/analyze`, {
                 text: text.trim()
             }, {
-                timeout: 30000, // 30 second timeout
+                timeout: 30000,
                 headers: {
                     'Content-Type': 'application/json',
                 }
@@ -95,8 +103,14 @@ export default function SentimentAnalyzer() {
                 throw new Error(response.data.error);
             }
 
-            const processedResult = processApiResponse(response.data);
-            setResult(processedResult);
+            // Process the response and show results
+            if (response.data.predictions) {
+                const processedResult = processApiResponse(response.data);
+                setResult(processedResult);
+            } else {
+                throw new Error('No predictions received from API');
+            }
+
         } catch (err: unknown) {
             console.error('Error analyzing sentiment:', err);
 
@@ -107,7 +121,7 @@ export default function SentimentAnalyzer() {
                 if (axiosError.response?.data?.error) {
                     errorMessage = axiosError.response.data.error;
                 } else if (axiosError.message?.includes('timeout')) {
-                    errorMessage = 'Request timed out. The model might be loading. Please try again in a few minutes.';
+                    errorMessage = 'Request timed out. Please try again.';
                 } else if (axiosError.message?.includes('Network Error')) {
                     errorMessage = 'Network error. Please check your connection and try again.';
                 }
@@ -190,6 +204,18 @@ export default function SentimentAnalyzer() {
                             </div>
                         ))}
                     </div>
+
+                    {result.note && (
+                        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                            <p className="text-blue-700 text-sm">{result.note}</p>
+                        </div>
+                    )}
+
+                    {result.source && (
+                        <div className="mt-2 text-xs text-gray-500">
+                            Source: {result.source}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
