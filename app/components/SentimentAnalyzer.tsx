@@ -84,8 +84,9 @@ export default function SentimentAnalyzer() {
         setResult(null);
 
         try {
-            // const API_URL = 'http://localhost:5000';
-            const API_URL = process.env.NEXT_PUBLIC_API_URL;
+            const API_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:5000' : process.env.NEXT_PUBLIC_API_URL;
+
+            console.log('Environment:', process.env.NODE_ENV);
             console.log('Using API URL:', API_URL);
 
             const response = await axios.post(`${API_URL}/api/analyze`, {
@@ -146,7 +147,8 @@ export default function SentimentAnalyzer() {
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     placeholder="Enter a WallStreetBets post to analyze sentiment... (e.g., 'TSLA to the moon! 🚀🚀🚀')"
-                    className="w-full p-4 text-base border border-gray-300 rounded-md mb-4 font-sans resize-vertical"
+                    className="w-full p-4 text-base border border-gray-700 rounded-md mb-4 font-sans resize-vertical 
+                             bg-neutral-900 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     rows={6}
                 />
                 <button
@@ -166,7 +168,7 @@ export default function SentimentAnalyzer() {
             </div>
 
             {result && (
-                <div className="w-full border border-gray-200 rounded-lg p-6 shadow-md bg-white">
+                <div className="w-full border border-gray-200 rounded-lg p-6 shadow-md bg-neutral-800">
                     <h2 className="text-xl font-bold mb-4">Analysis Result:</h2>
 
                     <div className="mb-4 p-3 bg-gray-50 rounded-lg">
