@@ -146,7 +146,7 @@ export default function SentimentAnalyzer() {
                 <textarea
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Enter a WallStreetBets post to analyze sentiment... (e.g., 'TSLA to the moon! 🚀🚀🚀')"
+                    placeholder="Enter a WallStreetBets post to analyze sentiment... (e.g., 'TSLA to the moon!')"
                     className="w-full p-4 text-base border border-gray-700 rounded-md mb-4 font-sans resize-vertical 
                              bg-neutral-900 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     rows={6}

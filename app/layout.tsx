@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Market Maker",
-  description: "sentiment analysis fine tuned on r/wallstreetbets",
+  title: "Market Maker - Financial Sentiment Dashboard",
+  description: "AI-powered sentiment analysis for stocks using earnings, news, and financial reports",
 };
 
 export default function RootLayout({
@@ -23,9 +23,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="bg-neutral-900">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-neutral-900`}
       >
         {children}
       </body>
