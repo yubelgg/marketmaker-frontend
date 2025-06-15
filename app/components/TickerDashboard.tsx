@@ -158,12 +158,12 @@ export default function TickerDashboard() {
     return (
         <div className="w-full h-full">
             {/* main dashboard */}
-            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-full">
                 {/* left side - sentiment section with search */}
-                <div className="xl:col-span-1">
-                    <div className="h-full border border-gray-700 rounded-lg p-6 bg-neutral-800 flex flex-col overflow-hidden">
-                        <div className="mb-6">
-                            <div className="flex gap-3">
+                <div className="lg:col-span-1 order-1">
+                    <div className="h-full min-h-[300px] lg:min-h-[600px] border border-gray-700 rounded-lg p-4 lg:p-6 bg-neutral-800 flex flex-col overflow-hidden">
+                        <div className="mb-4 lg:mb-6">
+                            <div className="flex flex-col sm:flex-row gap-3">
                                 <div className="flex-1">
                                     <TickerSearchInput
                                         value={ticker}
@@ -179,7 +179,7 @@ export default function TickerDashboard() {
                                 <button
                                     onClick={handleSearch}
                                     disabled={loading || !ticker.trim()}
-                                    className="px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors whitespace-nowrap text-sm"
+                                    className="px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors whitespace-nowrap text-sm w-full sm:w-auto"
                                 >
                                     {loading ? 'Analyzing...' : 'Analyze'}
                                 </button>
@@ -197,28 +197,28 @@ export default function TickerDashboard() {
                             </div>
                         </div>
 
-                        <h2 className="text-2xl font-bold text-white mb-6 flex-shrink-0">sentiment</h2>
+                        <h2 className="text-xl lg:text-2xl font-bold text-white mb-4 lg:mb-6 flex-shrink-0">sentiment</h2>
 
                         <div className="flex-1 min-h-0 overflow-y-auto">
                             {sentimentData ? (
-                                <div className="space-y-6">
+                                <div className="space-y-4 lg:space-y-6">
                                     {/* sentiment */}
                                     <div
-                                        className="text-center p-6 rounded-lg text-white font-bold text-2xl"
+                                        className="text-center p-4 lg:p-6 rounded-lg text-white font-bold text-lg lg:text-2xl"
                                         style={{ backgroundColor: getSentimentColor(sentimentData.sentiment) }}
                                     >
                                         {sentimentData.sentiment.toUpperCase()}
-                                        <div className="text-base font-normal mt-2">
+                                        <div className="text-sm lg:text-base font-normal mt-2">
                                             {(sentimentData.confidence * 100).toFixed(1)}% confidence
                                         </div>
                                     </div>
 
                                     {/* probability */}
                                     {sentimentData.probabilities && (
-                                        <div className="space-y-3">
-                                            <h4 className="text-white text-base font-medium">Breakdown:</h4>
+                                        <div className="space-y-2 lg:space-y-3">
+                                            <h4 className="text-white text-sm lg:text-base font-medium">Breakdown:</h4>
                                             {Object.entries(sentimentData.probabilities).map(([sentiment, value]) => (
-                                                <div key={sentiment} className="flex justify-between text-sm">
+                                                <div key={sentiment} className="flex justify-between text-xs lg:text-sm">
                                                     <span className="capitalize text-gray-300">{sentiment}:</span>
                                                     <span className="text-white font-medium">{(value * 100).toFixed(1)}%</span>
                                                 </div>
@@ -228,8 +228,8 @@ export default function TickerDashboard() {
 
                                     {/* ai generated text summary */}
                                     <div>
-                                        <h3 className="text-white font-medium mb-3 text-lg">text summary</h3>
-                                        <div className="text-sm text-gray-300 leading-relaxed">
+                                        <h3 className="text-white font-medium mb-2 lg:mb-3 text-base lg:text-lg">text summary</h3>
+                                        <div className="text-xs lg:text-sm text-gray-300 leading-relaxed">
                                             <span className="text-blue-400 font-medium">AI gen:</span>
                                             <p className="mt-2">{sentimentData.summary}</p>
                                         </div>
@@ -238,8 +238,8 @@ export default function TickerDashboard() {
                             ) : (
                                 <div className="flex items-center justify-center flex-1 text-gray-500">
                                     <div className="text-center">
-                                        <p className="mb-3 text-base">Enter a ticker symbol to analyze sentiment</p>
-                                        <div className="text-sm space-y-1">
+                                        <p className="mb-3 text-sm lg:text-base">Enter a ticker symbol to analyze sentiment</p>
+                                        <div className="text-xs lg:text-sm space-y-1">
                                             <p>• AI-powered analysis</p>
                                             <p>• Real-time processing</p>
                                             <p>• Market sentiment insights</p>
@@ -252,8 +252,8 @@ export default function TickerDashboard() {
                 </div>
 
                 {/* right side - charts grid */}
-                <div className="xl:col-span-3">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+                <div className="lg:col-span-3 order-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
                         {/* chart components */}
                         <EarningsChart ticker={ticker} shouldFetch={shouldFetchResults} />
                         <DividendsChart ticker={ticker} shouldFetch={shouldFetchResults} />
@@ -264,4 +264,4 @@ export default function TickerDashboard() {
             </div>
         </div>
     );
-} 
+}

@@ -95,35 +95,45 @@ export default function CashFlowChart({ ticker, shouldFetch }: CashFlowChartProp
         const freeCashFlow = cashFlowData.map(data => data.freeCashFlow);
         const netIncome = cashFlowData.map(data => data.netIncome);
 
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
         return {
             title: {
                 text: `${ticker.toUpperCase()} Cash Flow Analysis`,
                 subtext: 'Operating, Free Cash Flow & Net Income ($ Billions)',
                 left: 'center',
+                top: '2%',
                 textStyle: {
                     color: '#ffffff',
-                    fontSize: 18,
+                    fontSize: isMobile ? 14 : 18,
                     fontWeight: 'bold'
                 },
                 subtextStyle: {
                     color: '#9ca3af',
-                    fontSize: 12
+                    fontSize: isMobile ? 10 : 12
                 }
             },
             backgroundColor: 'transparent',
             legend: {
                 data: ['Operating Cash Flow', 'Free Cash Flow', 'Net Income'],
-                top: '12%',
+                top: isMobile ? '22%' : '18%',
+                left: 'center',
+                orient: 'horizontal',
+                itemGap: isMobile ? 8 : 15,
                 textStyle: {
-                    color: '#9ca3af'
-                }
+                    color: '#9ca3af',
+                    fontSize: isMobile ? 9 : 12
+                },
+                itemWidth: isMobile ? 12 : 18,
+                itemHeight: isMobile ? 8 : 12
             },
             tooltip: {
                 trigger: 'axis',
                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
                 borderColor: '#374151',
                 textStyle: {
-                    color: '#ffffff'
+                    color: '#ffffff',
+                    fontSize: isMobile ? 11 : 12
                 },
                 formatter: function (params: any) {
                     const dataIndex = params[0].dataIndex;
@@ -142,17 +152,18 @@ export default function CashFlowChart({ ticker, shouldFetch }: CashFlowChartProp
                 }
             },
             grid: {
-                left: '5%',
-                right: '5%',
-                bottom: '2%',
-                top: '20%',
+                left: isMobile ? '8%' : '5%',
+                right: isMobile ? '8%' : '5%',
+                bottom: isMobile ? '8%' : '5%',
+                top: isMobile ? '40%' : '35%',
                 containLabel: true
             },
             xAxis: {
                 type: 'category',
                 data: years,
                 axisLabel: {
-                    color: '#9ca3af'
+                    color: '#9ca3af',
+                    fontSize: isMobile ? 10 : 12
                 },
                 axisLine: {
                     lineStyle: {
@@ -164,11 +175,13 @@ export default function CashFlowChart({ ticker, shouldFetch }: CashFlowChartProp
                 type: 'value',
                 name: 'Amount ($ Billions)',
                 nameTextStyle: {
-                    color: '#9ca3af'
+                    color: '#9ca3af',
+                    fontSize: isMobile ? 10 : 12
                 },
                 axisLabel: {
                     color: '#9ca3af',
-                    formatter: '${value}B'
+                    formatter: '${value}B',
+                    fontSize: isMobile ? 10 : 12
                 },
                 axisLine: {
                     lineStyle: {
@@ -190,7 +203,7 @@ export default function CashFlowChart({ ticker, shouldFetch }: CashFlowChartProp
                     smooth: true,
                     lineStyle: {
                         color: '#3b82f6',
-                        width: 3
+                        width: isMobile ? 2 : 3
                     },
                     itemStyle: {
                         color: '#3b82f6'
@@ -216,7 +229,7 @@ export default function CashFlowChart({ ticker, shouldFetch }: CashFlowChartProp
                     smooth: true,
                     lineStyle: {
                         color: '#22c55e',
-                        width: 3
+                        width: isMobile ? 2 : 3
                     },
                     itemStyle: {
                         color: '#22c55e'
@@ -242,10 +255,10 @@ export default function CashFlowChart({ ticker, shouldFetch }: CashFlowChartProp
 
     if (loading) {
         return (
-            <div className="border border-gray-700 rounded-lg p-8 bg-neutral-800 min-h-[400px] flex items-center justify-center">
+            <div className="border border-gray-700 rounded-lg p-4 lg:p-8 bg-neutral-800 min-h-[250px] lg:min-h-[400px] flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p className="text-gray-400">Loading cash flow data...</p>
+                    <div className="animate-spin rounded-full h-8 w-8 lg:h-12 lg:w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p className="text-gray-400 text-sm lg:text-base">Loading cash flow data...</p>
                 </div>
             </div>
         );
@@ -253,14 +266,14 @@ export default function CashFlowChart({ ticker, shouldFetch }: CashFlowChartProp
 
     if (error) {
         return (
-            <div className="border border-gray-700 rounded-lg p-8 bg-neutral-800 min-h-[400px] flex items-center justify-center">
+            <div className="border border-gray-700 rounded-lg p-4 lg:p-8 bg-neutral-800 min-h-[250px] lg:min-h-[400px] flex items-center justify-center">
                 <div className="text-center">
-                    <div className="text-red-500 text-4xl mb-4">⚠️</div>
-                    <p className="text-red-400 mb-2">Error loading cash flow data</p>
-                    <p className="text-gray-500 text-sm">{error}</p>
+                    <div className="text-red-500 text-2xl lg:text-4xl mb-4">⚠️</div>
+                    <p className="text-red-400 mb-2 text-sm lg:text-base">Error loading cash flow data</p>
+                    <p className="text-gray-500 text-xs lg:text-sm mb-4">{error}</p>
                     <button
                         onClick={fetchCashFlowData}
-                        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                        className="px-3 py-2 lg:px-4 lg:py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
                     >
                         Retry
                     </button>
@@ -271,20 +284,20 @@ export default function CashFlowChart({ ticker, shouldFetch }: CashFlowChartProp
 
     if (cashFlowData.length === 0) {
         return (
-            <div className="border border-gray-700 rounded-lg p-8 bg-neutral-800 min-h-[400px] flex items-center justify-center">
+            <div className="border border-gray-700 rounded-lg p-4 lg:p-8 bg-neutral-800 min-h-[250px] lg:min-h-[400px] flex items-center justify-center">
                 <div className="text-center text-gray-500">
-                    <div className="text-6xl mb-4">💸</div>
-                    <p className="text-xl font-medium text-white mb-2">Cash Flow Analysis</p>
-                    <p className="text-base">Enter a ticker symbol to view cash flow</p>
+                    <div className="text-4xl lg:text-6xl mb-4">💸</div>
+                    <p className="text-lg lg:text-xl font-medium text-white mb-2">Cash Flow Analysis</p>
+                    <p className="text-sm lg:text-base">Enter a ticker symbol to view cash flow</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="border border-gray-700 rounded-lg p-6 bg-neutral-800 h-full flex flex-col">
+        <div className="border border-gray-700 rounded-lg p-3 lg:p-6 bg-neutral-800 h-full flex flex-col min-h-[250px] lg:min-h-[400px]">
             {/* echarts line chart */}
-            <div className="flex-1 min-h-0 mb-1">
+            <div className="flex-1 min-h-[180px] lg:min-h-[300px] mb-2">
                 <ReactECharts
                     option={getChartOption()}
                     style={{ height: '100%', width: '100%' }}
@@ -293,30 +306,30 @@ export default function CashFlowChart({ ticker, shouldFetch }: CashFlowChartProp
             </div>
 
             {/* summary stats */}
-            <div className="h-14 mb-1">
+            <div className="mb-2">
                 {cashFlowData.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center h-full">
-                        <div className="bg-neutral-900 rounded p-2 flex flex-col justify-center">
-                            <div className="text-xs text-gray-400">Latest Operating CF</div>
-                            <div className="text-sm font-semibold text-white">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-center">
+                        <div className="bg-neutral-900 rounded p-2 min-h-[50px] flex flex-col justify-center">
+                            <div className="text-xs text-gray-400 mb-1">Latest Operating CF</div>
+                            <div className="text-xs lg:text-sm font-semibold text-white">
                                 ${cashFlowData[cashFlowData.length - 1].operatingCashflow.toFixed(1)}B
                             </div>
                         </div>
-                        <div className="bg-neutral-900 rounded p-2 flex flex-col justify-center">
-                            <div className="text-xs text-gray-400">Latest Free CF</div>
-                            <div className="text-sm font-semibold text-white">
+                        <div className="bg-neutral-900 rounded p-2 min-h-[50px] flex flex-col justify-center">
+                            <div className="text-xs text-gray-400 mb-1">Latest Free CF</div>
+                            <div className="text-xs lg:text-sm font-semibold text-white">
                                 ${cashFlowData[cashFlowData.length - 1].freeCashFlow.toFixed(1)}B
                             </div>
                         </div>
-                        <div className="bg-neutral-900 rounded p-2 flex flex-col justify-center">
-                            <div className="text-xs text-gray-400">Avg Free CF</div>
-                            <div className="text-sm font-semibold text-white">
+                        <div className="bg-neutral-900 rounded p-2 min-h-[50px] flex flex-col justify-center">
+                            <div className="text-xs text-gray-400 mb-1">Avg Free CF</div>
+                            <div className="text-xs lg:text-sm font-semibold text-white">
                                 ${(cashFlowData.reduce((sum, data) => sum + data.freeCashFlow, 0) / cashFlowData.length).toFixed(1)}B
                             </div>
                         </div>
-                        <div className="bg-neutral-900 rounded p-2 flex flex-col justify-center">
-                            <div className="text-xs text-gray-400">FCF Conversion</div>
-                            <div className="text-sm font-semibold text-white">
+                        <div className="bg-neutral-900 rounded p-2 min-h-[50px] flex flex-col justify-center">
+                            <div className="text-xs text-gray-400 mb-1">FCF Conversion</div>
+                            <div className="text-xs lg:text-sm font-semibold text-white">
                                 {((cashFlowData[cashFlowData.length - 1].freeCashFlow / cashFlowData[cashFlowData.length - 1].netIncome) * 100).toFixed(0)}%
                             </div>
                         </div>
@@ -325,17 +338,17 @@ export default function CashFlowChart({ ticker, shouldFetch }: CashFlowChartProp
             </div>
 
             {/* legend */}
-            <div className="h-5 flex justify-center gap-4 text-xs">
+            <div className="flex justify-center gap-2 lg:gap-4 text-xs flex-wrap">
                 <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                    <div className="w-2 h-2 lg:w-3 lg:h-3 bg-blue-500 rounded"></div>
                     <span className="text-gray-400">Operating CF</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-green-500 rounded"></div>
+                    <div className="w-2 h-2 lg:w-3 lg:h-3 bg-green-500 rounded"></div>
                     <span className="text-gray-400">Free CF</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-amber-500 rounded"></div>
+                    <div className="w-2 h-2 lg:w-3 lg:h-3 bg-amber-500 rounded"></div>
                     <span className="text-gray-400">Net Income</span>
                 </div>
             </div>
