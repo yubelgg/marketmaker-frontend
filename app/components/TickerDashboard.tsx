@@ -156,12 +156,12 @@ export default function TickerDashboard() {
     };
 
     return (
-        <div className="w-full h-full">
+        <div className="w-full">
             {/* main dashboard */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-full">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                 {/* left side - sentiment section with search */}
                 <div className="lg:col-span-1 order-1">
-                    <div className="h-full min-h-[300px] lg:min-h-[600px] border border-gray-700 rounded-lg p-4 lg:p-6 bg-neutral-800 flex flex-col overflow-hidden">
+                    <div className="min-h-[300px] lg:min-h-[600px] border border-gray-700 rounded-lg p-4 lg:p-6 bg-neutral-800 flex flex-col">
                         <div className="mb-4 lg:mb-6">
                             <div className="flex flex-col sm:flex-row gap-3">
                                 <div className="flex-1">
@@ -199,7 +199,7 @@ export default function TickerDashboard() {
 
                         <h2 className="text-xl lg:text-2xl font-bold text-white mb-4 lg:mb-6 flex-shrink-0">sentiment</h2>
 
-                        <div className="flex-1 min-h-0 overflow-y-auto">
+                        <div className="flex-1">
                             {sentimentData ? (
                                 <div className="space-y-4 lg:space-y-6">
                                     {/* sentiment */}
@@ -253,7 +253,7 @@ export default function TickerDashboard() {
 
                 {/* right side - charts grid */}
                 <div className="lg:col-span-3 order-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* chart components */}
                         <EarningsChart ticker={ticker} shouldFetch={shouldFetchResults} />
                         <DividendsChart ticker={ticker} shouldFetch={shouldFetchResults} />

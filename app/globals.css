@@ -23,8 +23,6 @@ html {
   background-color: #171717 !important;
   background: #171717 !important;
   min-height: 100vh !important;
-  height: 100% !important;
-  overflow-x: hidden;
 }
 
 body {
@@ -33,14 +31,22 @@ body {
   color: #fafafa !important;
   font-family: Arial, Helvetica, sans-serif;
   min-height: 100vh !important;
-  height: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
-  overflow-x: hidden;
 }
 
 /* Ensure mobile-friendly responsive behavior */
 @media (max-width: 768px) {
+  html {
+    /* Prevent horizontal scrolling on mobile */
+    overflow-x: hidden;
+  }
+
+  body {
+    /* Prevent horizontal scrolling on mobile */
+    overflow-x: hidden;
+  }
+
   .echarts-container {
     min-height: 200px !important;
   }
