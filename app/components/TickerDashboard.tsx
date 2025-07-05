@@ -7,6 +7,7 @@ import TickerSearchInput from './TickerSearchInput';
 import DividendsChart from './DividendsChart';
 import CashFlowChart from './CashFlowChart';
 import IncomeStatementChart from './IncomeStatementChart';
+import { fetchStockNews, getCompanyName } from '../utils/newsApi';
 
 interface SentimentData {
     sentiment: 'positive' | 'neutral' | 'negative';
@@ -17,6 +18,13 @@ interface SentimentData {
         neutral: number;
         negative: number;
     };
+    newsArticles?: Array<{
+        title: string;
+        source: { name: string };
+        publishedAt: string;
+        url: string;
+    }>;
+    newsText?: string;
 }
 
 interface ApiResponse {
@@ -69,11 +77,11 @@ export default function TickerDashboard() {
         let summary = '';
 
         if (sentiment === 'positive') {
-            summary = `Analysis of ${tickerUpper} indicates positive market sentiment. The AI model detected bullish signals which could suggest favorable investor outlook, potential growth opportunities, or positive market reception. This sentiment analysis is based on the underlying patterns learned from financial discussions.`;
+            summary = `Recent news analysis for ${tickerUpper} indicates positive market sentiment. The AI model detected optimistic language in financial reports and news coverage, suggesting favorable investor outlook, potential growth opportunities, or positive market reception. This analysis is based on actual news content from reliable financial sources.`;
         } else if (sentiment === 'negative') {
-            summary = `Analysis of ${tickerUpper} shows negative market sentiment. The AI model identified bearish patterns that might indicate investor concerns, market uncertainties, or potential challenges. This suggests a cautious approach may be warranted for this ticker.`;
+            summary = `Recent news analysis for ${tickerUpper} shows negative market sentiment. The AI model identified concerning language in financial reports and news coverage that might indicate investor concerns, market uncertainties, or potential challenges. This suggests caution may be warranted based on current news sentiment.`;
         } else {
-            summary = `Analysis of ${tickerUpper} reveals neutral market sentiment. The AI model found balanced signals without strong directional bias, suggesting mixed investor opinions or a period of consolidation. This could indicate a wait-and-see approach in the market.`;
+            summary = `Recent news analysis for ${tickerUpper} reveals neutral market sentiment. The AI model found balanced language in financial reports and news coverage without strong directional bias, suggesting mixed investor opinions or a period of consolidation based on current news coverage.`;
         }
 
         return {
@@ -95,21 +103,32 @@ export default function TickerDashboard() {
         setLoading(true);
         setError('');
         setSentimentData(null);
-
         setShouldFetchResults(true);
 
-        console.log('Starting analysis for ticker:', ticker);
+        console.log('🔍 Starting news-based analysis for ticker:', ticker);
 
         try {
+            // Fetch recent news about the stock
+            console.log('Fetching recent news...');
+            const companyName = getCompanyName(ticker);
+            const newsResult = await fetchStockNews(ticker, companyName);
+
+            if (!newsResult.success) {
+                throw new Error(newsResult.error || 'Failed to fetch news');
+            }
+
+            console.log('Found news articles, proceeding to sentiment analysis...');
+
+            // Analyze sentiment of the news content
             const API_URL = process.env.NODE_ENV === 'development'
                 ? 'http://localhost:5000'
                 : process.env.NEXT_PUBLIC_API_URL;
 
-            const analysisText = `${ticker.toUpperCase()}`;
-            console.log('Analysis text:', analysisText);
+            console.log('Analyzing sentiment of news content...');
+            console.log('News text preview:', newsResult.text.substring(0, 200) + '...');
 
             const response = await axios.post(`${API_URL}/api/analyze`, {
-                text: analysisText.trim()
+                text: newsResult.text
             }, {
                 timeout: 15000,
                 headers: {
@@ -117,29 +136,41 @@ export default function TickerDashboard() {
                 }
             });
 
-
             if (response.data.error) {
                 throw new Error(response.data.error);
             }
 
             if (response.data.predictions) {
                 const processedResult = processApiResponse(response.data);
+                
+                // Add news metadata to the result
+                processedResult.newsArticles = newsResult.articles;
+                processedResult.newsText = newsResult.text;
+                
                 setSentimentData(processedResult);
+                console.log('Analysis complete!');
             } else {
                 throw new Error('No predictions received from API');
             }
 
         } catch (err: unknown) {
-            let errorMessage = 'Failed to analyze ticker sentiment. Please try again.';
+            console.error('Error in news-based sentiment analysis:', err);
+            
+            let errorMessage = 'Failed to analyze stock sentiment. Please try again.';
 
-            if (err && typeof err === 'object' && 'response' in err) {
-                const axiosError = err as { response?: { data?: { error?: string } }; message?: string };
-                if (axiosError.response?.data?.error) {
-                    errorMessage = axiosError.response.data.error;
-                } else if (axiosError.message?.includes('timeout')) {
-                    errorMessage = 'Request timed out. Please try again.';
-                } else if (axiosError.message?.includes('Network Error')) {
-                    errorMessage = 'Network error. Please check your connection and try again.';
+            if (err && typeof err === 'object') {
+                if ('response' in err) {
+                    const axiosError = err as { response?: { data?: { error?: string } }; message?: string };
+                    if (axiosError.response?.data?.error) {
+                        errorMessage = axiosError.response.data.error;
+                    } else if (axiosError.message?.includes('timeout')) {
+                        errorMessage = 'Request timed out. Please try again.';
+                    } else if (axiosError.message?.includes('Network Error')) {
+                        errorMessage = 'Network error. Please check your connection and try again.';
+                    }
+                } else if ('message' in err) {
+                    const genericError = err as { message: string };
+                    errorMessage = genericError.message;
                 }
             }
 
@@ -265,3 +296,4 @@ export default function TickerDashboard() {
         </div>
     );
 }
+ 
