@@ -9,6 +9,15 @@ import CashFlowChart from './CashFlowChart';
 import IncomeStatementChart from './IncomeStatementChart';
 import { fetchStockNews, getCompanyName } from '../utils/newsApi';
 
+/**
+ * Development-only logging utility
+ */
+const devLog = (message: string, ...args: any[]) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(message, ...args);
+  }
+};
+
 interface SentimentData {
     sentiment: 'positive' | 'neutral' | 'negative';
     confidence: number;
@@ -93,7 +102,7 @@ export default function TickerDashboard() {
     };
 
     const handleSearch = async () => {
-        console.log('handleSearch called with ticker:', ticker);
+        devLog('handleSearch called with ticker:', ticker);
 
         if (!ticker.trim()) {
             setError('Please enter a ticker symbol');
@@ -105,11 +114,11 @@ export default function TickerDashboard() {
         setSentimentData(null);
         setShouldFetchResults(true);
 
-        console.log('🔍 Starting news-based analysis for ticker:', ticker);
+        devLog('Starting news-based analysis for ticker:', ticker);
 
         try {
-            // Fetch recent news about the stock
-            console.log('Fetching recent news...');
+            // Step 1: Fetch recent news about the stock
+            devLog('Fetching recent news...');
             const companyName = getCompanyName(ticker);
             const newsResult = await fetchStockNews(ticker, companyName);
 
@@ -117,15 +126,15 @@ export default function TickerDashboard() {
                 throw new Error(newsResult.error || 'Failed to fetch news');
             }
 
-            console.log('Found news articles, proceeding to sentiment analysis...');
+            devLog('Found news articles, proceeding to sentiment analysis...');
 
-            // Analyze sentiment of the news content
+            // Step 2: Analyze sentiment of the news content
             const API_URL = process.env.NODE_ENV === 'development'
                 ? 'http://localhost:5000'
                 : process.env.NEXT_PUBLIC_API_URL;
 
-            console.log('Analyzing sentiment of news content...');
-            console.log('News text preview:', newsResult.text.substring(0, 200) + '...');
+            devLog('Analyzing sentiment of news content...');
+            devLog('News text preview:', newsResult.text.substring(0, 200) + '...');
 
             const response = await axios.post(`${API_URL}/api/analyze`, {
                 text: newsResult.text
@@ -148,7 +157,7 @@ export default function TickerDashboard() {
                 processedResult.newsText = newsResult.text;
                 
                 setSentimentData(processedResult);
-                console.log('Analysis complete!');
+                devLog('Analysis complete!');
             } else {
                 throw new Error('No predictions received from API');
             }

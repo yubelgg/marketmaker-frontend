@@ -16,6 +16,15 @@ interface StockNewsResult {
 }
 
 /**
+ * Development-only logging utility
+ */
+const devLog = (message: string, ...args: any[]) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(message, ...args);
+  }
+};
+
+/**
  * Fetch recent news about a stock for sentiment analysis
  * Uses server-side API route to bypass CORS restrictions
  */
@@ -26,7 +35,7 @@ export async function fetchStockNews(symbol: string, companyName?: string): Prom
       ...(companyName && { companyName })
     });
 
-    console.log(`Fetching news for ${symbol}...`);
+    devLog(`Fetching news for ${symbol}...`);
     
     const response = await fetch(`/api/news?${params}`, {
       method: 'GET',
@@ -47,7 +56,7 @@ export async function fetchStockNews(symbol: string, companyName?: string): Prom
 
     const data = await response.json();
     
-    console.log(`Found news for ${symbol}`);
+    devLog(`Found news for ${symbol}`);
 
     return {
       success: true,
@@ -56,7 +65,7 @@ export async function fetchStockNews(symbol: string, companyName?: string): Prom
     };
 
   } catch (error) {
-    console.error('Error fetching stock news:', error);
+    console.error('Error fetching stock news:', error instanceof Error ? error.message : 'Unknown error');
     
     return {
       success: false,

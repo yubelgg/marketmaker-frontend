@@ -52,11 +52,8 @@ export default function TickerSearchInput({
             const API_KEY = process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY;
 
             if (!API_KEY) {
-                console.warn('Alpha Vantage API key not found. Using fallback suggestions.');
-                // Fallback: provide basic suggestions without API
-                const fallbackSuggestions = getFallbackSuggestions(query);
-                setSearchResults(fallbackSuggestions);
-                setShowSuggestions(fallbackSuggestions.length > 0);
+                setSearchResults([]);
+                setShowSuggestions(false);
                 setIsSearching(false);
                 return;
             }
@@ -66,18 +63,18 @@ export default function TickerSearchInput({
             const response = await axios.get(url);
 
             if (response.data['Error Message']) {
-                console.error('Alpha Vantage error:', response.data['Error Message']);
-                const fallbackSuggestions = getFallbackSuggestions(query);
-                setSearchResults(fallbackSuggestions);
-                setShowSuggestions(fallbackSuggestions.length > 0);
+                // API error
+                setSearchResults([]);
+                setShowSuggestions(false);
+                setIsSearching(false);
                 return;
             }
 
             if (response.data['Note']) {
-                console.warn('Alpha Vantage rate limit:', response.data['Note']);
-                const fallbackSuggestions = getFallbackSuggestions(query);
-                setSearchResults(fallbackSuggestions);
-                setShowSuggestions(fallbackSuggestions.length > 0);
+                // Rate limit - don't show suggestions
+                setSearchResults([]);
+                setShowSuggestions(false);
+                setIsSearching(false);
                 return;
             }
 
@@ -97,49 +94,11 @@ export default function TickerSearchInput({
             setShowSuggestions(filteredResults.length > 0);
 
         } catch (error) {
-            console.error('Error searching tickers:', error);
-            const fallbackSuggestions = getFallbackSuggestions(query);
-            setSearchResults(fallbackSuggestions);
-            setShowSuggestions(fallbackSuggestions.length > 0);
+            setSearchResults([]);
+            setShowSuggestions(false);
         } finally {
             setIsSearching(false);
         }
-    };
-
-    // fallback suggestions when API is not available
-    const getFallbackSuggestions = (query: string): SearchResult[] => {
-        const popularStocks = [
-            { symbol: 'AAPL', name: 'Apple Inc' },
-            { symbol: 'MSFT', name: 'Microsoft Corporation' },
-            { symbol: 'GOOGL', name: 'Alphabet Inc Class A' },
-            { symbol: 'AMZN', name: 'Amazon.com Inc' },
-            { symbol: 'TSLA', name: 'Tesla Inc' },
-            { symbol: 'META', name: 'Meta Platforms Inc' },
-            { symbol: 'NVDA', name: 'NVIDIA Corporation' },
-            { symbol: 'NFLX', name: 'Netflix Inc' },
-            { symbol: 'SPY', name: 'SPDR S&P 500 ETF Trust' },
-            { symbol: 'QQQ', name: 'Invesco QQQ Trust' }
-        ];
-
-        const lowerQuery = query.toLowerCase();
-
-        return popularStocks
-            .filter(stock =>
-                stock.symbol.toLowerCase().includes(lowerQuery) ||
-                stock.name.toLowerCase().includes(lowerQuery)
-            )
-            .map(stock => ({
-                '1. symbol': stock.symbol,
-                '2. name': stock.name,
-                '3. type': 'Equity',
-                '4. region': 'United States',
-                '5. marketOpen': '09:30',
-                '6. marketClose': '16:00',
-                '7. timezone': 'UTC-04',
-                '8. currency': 'USD',
-                '9. matchScore': '0.8'
-            }))
-            .slice(0, 5);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -302,8 +261,8 @@ export default function TickerSearchInput({
                 </div>
             )}
 
-            {/* no results message */}
-            {showSuggestions && searchResults.length === 0 && !isSearching && value.length >= 2 && (
+            {/* no results message - only show if API is working but no matches found */}
+            {showSuggestions && searchResults.length === 0 && !isSearching && value.length >= 3 && process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY && (
                 <div className="absolute z-50 w-full mt-1 bg-neutral-800 border border-gray-600 rounded-lg shadow-lg">
                     <div className="px-4 py-3 text-gray-400 text-center">
                         No matching stocks found for "{value}"
@@ -313,18 +272,6 @@ export default function TickerSearchInput({
                     </div>
                 </div>
             )}
-
-            {/* debug info when no API key */}
-            {!process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY && value.length >= 3 && (
-                <div className="absolute z-50 w-full mt-1 bg-yellow-900 border border-yellow-600 rounded-lg shadow-lg">
-                    <div className="px-4 py-3 text-yellow-200 text-center text-sm">
-                        Alpha Vantage API key not configured
-                        <div className="text-xs mt-1">
-                            Using fallback suggestions. Add API key for full search.
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
-} 
+}
