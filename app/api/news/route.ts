@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       }, { status: 404 });
     }
 
-    // Combine all article texts
+    // Combine all article textes
     const combinedText = articleTexts.join(' ');
     
     // Ensure text isn't too long
