@@ -8,6 +8,13 @@ import DividendsChart from './DividendsChart';
 import CashFlowChart from './CashFlowChart';
 import IncomeStatementChart from './IncomeStatementChart';
 import { fetchStockNews, getCompanyName } from '../utils/newsApi';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import { Brain, TrendingUp, TrendingDown, Minus, Loader2 } from 'lucide-react';
+import FloatingCard from './ui/floating-card';
 
 /**
  * Development-only logging utility
@@ -190,110 +197,166 @@ export default function TickerDashboard() {
     };
 
     const getSentimentColor = (sentiment: string) => {
-        if (sentiment === 'positive') return '#22c55e';
-        if (sentiment === 'negative') return '#ef4444';
-        return '#f59e0b';
+        if (sentiment === 'positive') return 'bg-green-500';
+        if (sentiment === 'negative') return 'bg-red-500';
+        return 'bg-yellow-500';
+    };
+
+    const getSentimentIcon = (sentiment: string) => {
+        if (sentiment === 'positive') return <TrendingUp className="h-5 w-5" />;
+        if (sentiment === 'negative') return <TrendingDown className="h-5 w-5" />;
+        return <Minus className="h-5 w-5" />;
+    };
+
+    const getSentimentVariant = (sentiment: string) => {
+        if (sentiment === 'positive') return 'default';
+        if (sentiment === 'negative') return 'destructive';
+        return 'secondary';
     };
 
     return (
-        <div className="w-full">
+        <div className="w-full space-y-6">
             {/* main dashboard */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {/* left side - sentiment section with search */}
                 <div className="lg:col-span-1 order-1">
-                    <div className="min-h-[300px] lg:min-h-[600px] border border-gray-700 rounded-lg p-4 lg:p-6 bg-neutral-800 flex flex-col">
-                        <div className="mb-4 lg:mb-6">
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <div className="flex-1">
-                                    <TickerSearchInput
-                                        value={ticker}
-                                        onChange={(value) => {
-                                            setTicker(value);
-                                            setShouldFetchResults(false);
-                                        }}
-                                        onSearch={handleSearch}
-                                        loading={loading}
-                                        placeholder="ticker symbol or name"
-                                    />
-                                </div>
-                                <button
-                                    onClick={handleSearch}
-                                    disabled={loading || !ticker.trim()}
-                                    className="px-4 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors whitespace-nowrap text-sm w-full sm:w-auto"
-                                >
-                                    {loading ? 'Analyzing...' : 'Analyze'}
-                                </button>
-                            </div>
-
-                            {error && (
-                                <div className="mt-3 p-3 bg-red-900/50 border border-red-600 rounded-lg">
-                                    <p className="text-red-200 text-sm">{error}</p>
-                                </div>
-                            )}
-
-                            {/* search tips */}
-                            <div className="mt-2 text-xs text-gray-400">
-                                Try searching by company name or symbol
-                            </div>
-                        </div>
-
-                        <h2 className="text-xl lg:text-2xl font-bold text-white mb-4 lg:mb-6 flex-shrink-0">sentiment</h2>
-
-                        <div className="flex-1">
-                            {sentimentData ? (
-                                <div className="space-y-4 lg:space-y-6">
-                                    {/* sentiment */}
-                                    <div
-                                        className="text-center p-4 lg:p-6 rounded-lg text-white font-bold text-lg lg:text-2xl"
-                                        style={{ backgroundColor: getSentimentColor(sentimentData.sentiment) }}
+                    <FloatingCard className="min-h-[300px] lg:min-h-[600px]">
+                        <CardHeader className="space-y-6">
+                            {/* Search Section */}
+                            <div className="space-y-4">
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <div className="flex-1">
+                                        <TickerSearchInput
+                                            value={ticker}
+                                            onChange={(value) => {
+                                                setTicker(value);
+                                                setShouldFetchResults(false);
+                                            }}
+                                            onSearch={handleSearch}
+                                            loading={loading}
+                                            placeholder="ticker symbol or name"
+                                        />
+                                    </div>
+                                    <Button
+                                        onClick={handleSearch}
+                                        disabled={loading || !ticker.trim()}
+                                        className="bg-blue-600 hover:bg-blue-700 whitespace-nowrap"
                                     >
-                                        {sentimentData.sentiment.toUpperCase()}
-                                        <div className="text-sm lg:text-base font-normal mt-2">
-                                            {(sentimentData.confidence * 100).toFixed(1)}% confidence
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Analyzing...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Brain className="mr-2 h-4 w-4" />
+                                                Analyze
+                                            </>
+                                        )}
+                                    </Button>
+                                </div>
+
+                                {error && (
+                                    <Alert variant="destructive">
+                                        <AlertDescription>{error}</AlertDescription>
+                                    </Alert>
+                                )}
+
+                                <p className="text-xs text-muted-foreground">
+                                    Try searching by company name or symbol
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <Brain className="h-5 w-5 text-blue-400" />
+                                <CardTitle className="text-xl lg:text-2xl">AI Sentiment Analysis</CardTitle>
+                            </div>
+                        </CardHeader>
+
+                        <CardContent className="flex-1 space-y-6">
+                            {sentimentData ? (
+                                <div className="space-y-6">
+                                    {/* Main Sentiment Display */}
+                                    <div className="text-center space-y-4">
+                                        <Badge 
+                                            variant={getSentimentVariant(sentimentData.sentiment)}
+                                            className={`${getSentimentColor(sentimentData.sentiment)} text-white px-6 py-3 text-lg font-bold rounded-xl`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                {getSentimentIcon(sentimentData.sentiment)}
+                                                {sentimentData.sentiment.toUpperCase()}
+                                            </div>
+                                        </Badge>
+                                        
+                                        <div className="space-y-2">
+                                            <p className="text-sm text-muted-foreground">Confidence Score</p>
+                                            <Progress 
+                                                value={sentimentData.confidence * 100} 
+                                                className="w-full h-2"
+                                            />
+                                            <p className="text-sm font-medium">
+                                                {(sentimentData.confidence * 100).toFixed(1)}%
+                                            </p>
                                         </div>
                                     </div>
 
-                                    {/* probability */}
+                                    {/* Probability Breakdown */}
                                     {sentimentData.probabilities && (
-                                        <div className="space-y-2 lg:space-y-3">
-                                            <h4 className="text-white text-sm lg:text-base font-medium">Breakdown:</h4>
-                                            {Object.entries(sentimentData.probabilities).map(([sentiment, value]) => (
-                                                <div key={sentiment} className="flex justify-between text-xs lg:text-sm">
-                                                    <span className="capitalize text-gray-300">{sentiment}:</span>
-                                                    <span className="text-white font-medium">{(value * 100).toFixed(1)}%</span>
-                                                </div>
-                                            ))}
-                                        </div>
+                                        <Card className="bg-neutral-800/50 border-neutral-700">
+                                            <CardHeader>
+                                                <CardTitle className="text-sm">Probability Breakdown</CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="space-y-3">
+                                                {Object.entries(sentimentData.probabilities).map(([sentiment, value]) => (
+                                                    <div key={sentiment} className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                            {getSentimentIcon(sentiment)}
+                                                            <span className="capitalize text-sm">{sentiment}</span>
+                                                        </div>
+                                                        <Badge variant="outline" className="text-xs">
+                                                            {(value * 100).toFixed(1)}%
+                                                        </Badge>
+                                                    </div>
+                                                ))}
+                                            </CardContent>
+                                        </Card>
                                     )}
 
-                                    {/* ai generated text summary */}
-                                    <div>
-                                        <h3 className="text-white font-medium mb-2 lg:mb-3 text-base lg:text-lg">text summary</h3>
-                                        <div className="text-xs lg:text-sm text-gray-300 leading-relaxed">
-                                            <span className="text-blue-400 font-medium">AI gen:</span>
-                                            <p className="mt-2">{sentimentData.summary}</p>
-                                        </div>
-                                    </div>
+                                    {/* AI Summary */}
+                                    <Card className="bg-neutral-800/50 border-neutral-700">
+                                        <CardHeader>
+                                            <CardTitle className="text-sm flex items-center gap-2">
+                                                <Brain className="h-4 w-4 text-blue-400" />
+                                                AI Summary
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                                {sentimentData.summary}
+                                            </p>
+                                        </CardContent>
+                                    </Card>
                                 </div>
                             ) : (
-                                <div className="flex items-center justify-center flex-1 text-gray-500">
-                                    <div className="text-center">
-                                        <p className="mb-3 text-sm lg:text-base">Enter a ticker symbol to analyze sentiment</p>
-                                        <div className="text-xs lg:text-sm space-y-1">
-                                            <p>• AI-powered analysis</p>
-                                            <p>• Real-time processing</p>
+                                <Card className="bg-neutral-800/30 border-neutral-700 border-dashed">
+                                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                                        <Brain className="h-12 w-12 text-gray-400 mb-4 opacity-50" />
+                                        <CardTitle className="text-base font-bold text-white mb-2">Ready to Analyze</CardTitle>
+                                        <CardDescription className="space-y-1 text-gray-300">
+                                            <p>• AI-powered sentiment analysis</p>
+                                            <p>• Real-time news processing</p>
                                             <p>• Market sentiment insights</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                        </CardDescription>
+                                    </CardContent>
+                                </Card>
                             )}
-                        </div>
-                    </div>
+                        </CardContent>
+                    </FloatingCard>
                 </div>
 
                 {/* right side - charts grid */}
                 <div className="lg:col-span-3 order-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* chart components */}
                         <EarningsChart ticker={ticker} shouldFetch={shouldFetchResults} />
                         <DividendsChart ticker={ticker} shouldFetch={shouldFetchResults} />

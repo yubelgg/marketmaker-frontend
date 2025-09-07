@@ -29,7 +29,7 @@ export default function Home() {
                             <AnimatedGradientText className="text-5xl md:text-7xl font-bold">
                                 Sentiment Analysis
                             </AnimatedGradientText>
-                        </h1>
+                </h1>
                     <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed">
                         Harness the power of artificial intelligence to analyze market sentiment, 
                         financial reports, and real-time news data for informed investment decisions.
@@ -171,8 +171,8 @@ export default function Home() {
                         <p className="text-gray-400 text-sm">
                             © 2024 Market Maker. AI-powered financial analysis.
                         </p>
-                    </div>
                 </div>
+            </div>
             </footer>
         </main>
     );

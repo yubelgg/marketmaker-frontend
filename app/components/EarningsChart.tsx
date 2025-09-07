@@ -3,6 +3,12 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import ReactECharts from 'echarts-for-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { TrendingUp, BarChart3, AlertCircle } from 'lucide-react';
+import FloatingCard from './ui/floating-card';
 
 interface EarningsData {
     fiscalDateEnding: string;
@@ -106,12 +112,13 @@ export default function EarningsChart({ ticker, shouldFetch }: EarningsChartProp
                 left: 'center',
                 textStyle: {
                     color: '#ffffff',
-                    fontSize: isMobile ? 14 : 18,
+                    fontSize: isMobile ? 16 : 20,
                     fontWeight: 'bold'
                 },
                 subtextStyle: {
-                    color: '#9ca3af',
-                    fontSize: isMobile ? 10 : 12
+                    color: '#f3f4f6',
+                    fontSize: isMobile ? 12 : 14,
+                    fontWeight: 500
                 }
             },
             backgroundColor: 'transparent',
@@ -170,13 +177,15 @@ export default function EarningsChart({ ticker, shouldFetch }: EarningsChartProp
                 type: 'value',
                 name: 'EPS ($)',
                 nameTextStyle: {
-                    color: '#9ca3af',
-                    fontSize: isMobile ? 10 : 12
+                    color: '#d1d5db',
+                    fontSize: isMobile ? 11 : 13,
+                    fontWeight: 500
                 },
                 axisLabel: {
-                    color: '#9ca3af',
+                    color: '#e5e7eb',
                     formatter: '${value}',
-                    fontSize: isMobile ? 10 : 12
+                    fontSize: isMobile ? 11 : 13,
+                    fontWeight: 500
                 },
                 axiosLine: {
                     lineStyle: {
@@ -237,84 +246,118 @@ export default function EarningsChart({ ticker, shouldFetch }: EarningsChartProp
 
     if (earningsData.length === 0) {
         return (
-            <div className="border border-gray-700 rounded-lg p-4 lg:p-8 bg-neutral-800 min-h-[250px] lg:min-h-[400px] flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                    <div className="text-4xl lg:text-6xl mb-4">📊</div>
-                    <p className="text-lg lg:text-xl font-medium text-white mb-2">Earnings Data</p>
-                    <p className="text-sm lg:text-base">Enter a ticker symbol to view earnings</p>
-                </div>
-            </div>
+            <FloatingCard className="flex flex-col h-full min-h-[350px] lg:min-h-[450px]">
+                <CardHeader>
+                    <div className="flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5 text-blue-400" />
+                        <CardTitle className="text-lg font-bold text-white">Earnings Per Share</CardTitle>
+                    </div>
+                    <CardDescription className="text-gray-300">
+                        Enter a ticker symbol to view earnings data
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1 flex items-center justify-center">
+                    <div className="text-center text-muted-foreground">
+                        <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>Ready to analyze earnings</p>
+                    </div>
+                </CardContent>
+            </FloatingCard>
         );
     }
 
-    return (
-        <div className="border border-gray-700 rounded-lg p-3 lg:p-6 bg-neutral-800 h-full flex flex-col min-h-[250px] lg:min-h-[400px]">
-            {/* echarts bar chart */}
-            <div className="flex-1 min-h-[180px] lg:min-h-[300px] mb-2">
-                <ReactECharts
-                    option={getChartOption()}
-                    style={{ height: '100%', width: '100%' }}
-                    theme="dark"
-                />
-            </div>
+    const latestEPS = earningsData.length > 0 ? parseFloat(earningsData[earningsData.length - 1].reportedEPS) : 0;
+    const yoyGrowth = earningsData.length >= 2 ? 
+        (((parseFloat(earningsData[earningsData.length - 1].reportedEPS) - parseFloat(earningsData[earningsData.length - 2].reportedEPS)) / Math.abs(parseFloat(earningsData[earningsData.length - 2].reportedEPS)) * 100)) : 0;
+    const avgEPS = earningsData.length > 0 ? earningsData.reduce((sum, data) => sum + parseFloat(data.reportedEPS || '0'), 0) / earningsData.length : 0;
+    const growthYears = earningsData.filter((data, index) => {
+        if (index === 0) return false;
+        return parseFloat(data.reportedEPS || '0') > parseFloat(earningsData[index - 1].reportedEPS || '0');
+    }).length;
 
-            {/* summary stats */}
-            <div className="mb-2">
+    return (
+        <FloatingCard className="flex flex-col h-full min-h-[350px] lg:min-h-[450px]">
+            <CardHeader>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5 text-blue-400" />
+                        <CardTitle className="text-lg font-bold text-white">Earnings Per Share</CardTitle>
+                    </div>
+                    {latestEPS > 0 && (
+                        <Badge variant={yoyGrowth > 0 ? "default" : yoyGrowth < 0 ? "destructive" : "secondary"} className="text-xs">
+                            <TrendingUp className="h-3 w-3 mr-1" />
+                            ${latestEPS.toFixed(2)}
+                        </Badge>
+                    )}
+                </div>
+                <CardDescription className="text-gray-300">
+                    Historical earnings per share with growth analysis
+                </CardDescription>
+            </CardHeader>
+
+            <CardContent className="flex flex-col h-full space-y-4">
+                {/* echarts bar chart */}
+                <div className="flex-1 min-h-[200px] w-full">
+                    <ReactECharts
+                        option={getChartOption()}
+                        style={{ height: '100%', width: '100%' }}
+                        theme="dark"
+                        opts={{ renderer: 'svg' }}
+                    />
+                </div>
+
+                {/* summary stats */}
                 {earningsData.length > 0 && (
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 text-center">
-                        <div className="bg-neutral-900 rounded p-2 min-h-[50px] flex flex-col justify-center">
-                            <div className="text-xs text-gray-400 mb-1">Latest EPS</div>
-                            <div className="text-xs lg:text-sm font-semibold text-white">
-                                ${parseFloat(earningsData[earningsData.length - 1].reportedEPS).toFixed(2)}
-                            </div>
-                        </div>
-                        <div className="bg-neutral-900 rounded p-2 min-h-[50px] flex flex-col justify-center">
-                            <div className="text-xs text-gray-400 mb-1">YoY Growth</div>
-                            <div className="text-xs lg:text-sm font-semibold text-white">
-                                {earningsData.length >= 2 ?
-                                    (((parseFloat(earningsData[earningsData.length - 1].reportedEPS) - parseFloat(earningsData[earningsData.length - 2].reportedEPS)) / Math.abs(parseFloat(earningsData[earningsData.length - 2].reportedEPS)) * 100).toFixed(1) + '%')
-                                    : 'N/A'
-                                }
-                            </div>
-                        </div>
-                        <div className="bg-neutral-900 rounded p-2 min-h-[50px] flex flex-col justify-center">
-                            <div className="text-xs text-gray-400 mb-1">Avg EPS</div>
-                            <div className="text-xs lg:text-sm font-semibold text-white">
-                                ${(earningsData.reduce((sum, data) => sum + parseFloat(data.reportedEPS || '0'), 0) / earningsData.length).toFixed(2)}
-                            </div>
-                        </div>
-                        <div className="bg-neutral-900 rounded p-2 min-h-[50px] flex flex-col justify-center">
-                            <div className="text-xs text-gray-400 mb-1">Growth Years</div>
-                            <div className="text-xs lg:text-sm font-semibold text-white">
-                                {earningsData.filter((data, index) => {
-                                    if (index === 0) return false;
-                                    return parseFloat(data.reportedEPS || '0') > parseFloat(earningsData[index - 1].reportedEPS || '0');
-                                }).length}/{earningsData.length - 1}
-                            </div>
-                        </div>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <Card className="bg-neutral-700/50 border-neutral-600">
+                            <CardContent className="p-3 text-center">
+                                <div className="text-xs text-gray-300 mb-1 font-medium">Latest EPS</div>
+                                <div className="text-sm font-bold text-white">${latestEPS.toFixed(2)}</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-neutral-700/50 border-neutral-600">
+                            <CardContent className="p-3 text-center">
+                                <div className="text-xs text-gray-300 mb-1 font-medium">YoY Growth</div>
+                                <div className={`text-sm font-bold ${yoyGrowth > 0 ? 'text-green-300' : yoyGrowth < 0 ? 'text-red-300' : 'text-white'}`}>
+                                    {earningsData.length >= 2 ? `${yoyGrowth.toFixed(1)}%` : 'N/A'}
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-neutral-700/50 border-neutral-600">
+                            <CardContent className="p-3 text-center">
+                                <div className="text-xs text-gray-300 mb-1 font-medium">Avg EPS</div>
+                                <div className="text-sm font-bold text-white">${avgEPS.toFixed(2)}</div>
+                            </CardContent>
+                        </Card>
+                        <Card className="bg-neutral-700/50 border-neutral-600">
+                            <CardContent className="p-3 text-center">
+                                <div className="text-xs text-gray-300 mb-1 font-medium">Growth Years</div>
+                                <div className="text-sm font-bold text-white">{growthYears}/{earningsData.length - 1}</div>
+                            </CardContent>
+                        </Card>
                     </div>
                 )}
-            </div>
 
-            {/* legend */}
-            <div className="flex justify-center gap-2 lg:gap-4 text-xs flex-wrap">
-                <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 lg:w-3 lg:h-3 bg-blue-500 rounded"></div>
-                    <span className="text-gray-400">First Year</span>
+                {/* legend */}
+                <div className="flex justify-center gap-4 text-xs flex-wrap">
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                        <span className="text-gray-300 font-medium">First Year</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-500 rounded"></div>
+                        <span className="text-gray-300 font-medium">Growth</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-amber-500 rounded"></div>
+                        <span className="text-gray-300 font-medium">Decline</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-red-500 rounded"></div>
+                        <span className="text-gray-300 font-medium">Negative</span>
+                    </div>
                 </div>
-                <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 lg:w-3 lg:h-3 bg-green-500 rounded"></div>
-                    <span className="text-gray-400">Growth</span>
-                </div>
-                <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 lg:w-3 lg:h-3 bg-amber-500 rounded"></div>
-                    <span className="text-gray-400">Decline</span>
-                </div>
-                <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 lg:w-3 lg:h-3 bg-red-500 rounded"></div>
-                    <span className="text-gray-400">Negative</span>
-                </div>
-            </div>
-        </div>
+            </CardContent>
+        </FloatingCard>
     );
 }

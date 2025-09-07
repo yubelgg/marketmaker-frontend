@@ -19,10 +19,11 @@ export default function FloatingCard({
             className={cn(
                 "bg-neutral-800/50 border-neutral-700 backdrop-blur-sm",
                 "shadow-lg hover:shadow-xl transition-all duration-300",
-                hoverEffect && "hover:bg-neutral-800/70 hover:-translate-y-1 hover:scale-[1.02]",
+                hoverEffect && "hover:bg-neutral-800/70 hover:-translate-y-1 hover:scale-[1.01]",
                 "relative overflow-hidden",
                 "before:absolute before:inset-0 before:bg-gradient-to-r before:from-blue-500/5 before:via-purple-500/5 before:to-cyan-500/5",
                 "before:opacity-0 hover:before:opacity-100 before:transition-opacity before:duration-300",
+                "will-change-transform",
                 className
             )}
         >

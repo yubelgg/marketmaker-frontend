@@ -2,6 +2,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Search, TrendingUp } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface SearchResult {
     '1. symbol': string;
@@ -192,7 +197,7 @@ export default function TickerSearchInput({
     return (
         <div className="relative w-full">
             <div className="relative">
-                <input
+                <Input
                     ref={inputRef}
                     type="text"
                     value={value}
@@ -204,61 +209,65 @@ export default function TickerSearchInput({
                         }
                     }}
                     placeholder={placeholder}
-                    className="w-full px-4 py-3 pr-12 text-lg border border-gray-600 rounded-lg bg-neutral-800 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="text-lg py-3 pr-12 bg-neutral-800/50 border-neutral-600 focus:border-blue-500 focus:ring-blue-500"
                 />
 
                 {/* loading spinner for search */}
                 {isSearching && (
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                        <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
                     </div>
                 )}
 
                 {/* search icon when not searching */}
                 {!isSearching && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground">
+                        <Search className="w-5 h-5" />
                     </div>
                 )}
             </div>
 
             {/* suggestions dropdown */}
             {showSuggestions && searchResults.length > 0 && (
-                <div
+                <Card
                     ref={suggestionsRef}
-                    className="absolute z-50 w-full mt-1 bg-neutral-800 border border-gray-600 rounded-lg shadow-lg max-h-80 overflow-y-auto"
+                    className="absolute z-50 w-full mt-1 bg-neutral-800/95 backdrop-blur border-neutral-600 shadow-lg max-h-80 overflow-hidden"
                 >
-                    {searchResults.map((result, index) => (
-                        <div
-                            key={`${result['1. symbol']}-${index}`}
-                            onClick={() => handleSuggestionClick(result)}
-                            className="px-4 py-3 hover:bg-neutral-700 cursor-pointer border-b border-gray-700 last:border-b-0 transition-colors"
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-mono font-bold text-blue-400 text-lg">
-                                            {result['1. symbol']}
-                                        </span>
-                                        <span className="text-white font-medium">
-                                            {formatCompanyName(result['2. name'])}
-                                        </span>
-                                    </div>
-                                    <div className="text-sm text-gray-400 mt-1">
-                                        {result['3. type']} • {result['8. currency']} • Match: {(parseFloat(result['9. matchScore']) * 100).toFixed(0)}%
+                    <CardContent className="p-0 max-h-80 overflow-y-auto">
+                        {searchResults.map((result, index) => (
+                            <div
+                                key={`${result['1. symbol']}-${index}`}
+                                onClick={() => handleSuggestionClick(result)}
+                                className="px-4 py-3 hover:bg-neutral-700/50 cursor-pointer border-b border-neutral-700 last:border-b-0 transition-colors will-change-auto"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-3">
+                                            <Badge variant="secondary" className="font-mono text-blue-400 bg-blue-500/20">
+                                                {result['1. symbol']}
+                                            </Badge>
+                                            <span className="text-white font-medium truncate">
+                                                {formatCompanyName(result['2. name'])}
+                                            </span>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+                                            <TrendingUp className="h-3 w-3" />
+                                            {result['3. type']} • {result['8. currency']} • 
+                                            <Badge variant="outline" className="text-xs">
+                                                {(parseFloat(result['9. matchScore']) * 100).toFixed(0)}% match
+                                            </Badge>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
 
-                    {/* footer with API attribution */}
-                    <div className="px-4 py-2 bg-neutral-900 text-xs text-gray-500 border-t border-gray-700">
-                        Powered by Alpha Vantage Symbol Search
-                    </div>
-                </div>
+                        {/* footer with API attribution */}
+                        <div className="px-4 py-2 bg-neutral-900/50 text-xs text-muted-foreground border-t border-neutral-700">
+                            Powered by Alpha Vantage Symbol Search
+                        </div>
+                    </CardContent>
+                </Card>
             )}
 
             {/* no results message - only show if API is working but no matches found */}
